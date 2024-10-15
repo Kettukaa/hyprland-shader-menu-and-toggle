@@ -1,0 +1,90 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+TEMP_FILE="/tmp/hyprshade_state_${USER}"
+DYNAMIC_SHADER="/tmp/dynamic_shader_${USER}.frag"
+
+clean_string() {
+    tr -cd '[:alnum:]_/.'
+}
+
+get_current_shader() {
+    local current_shader
+    current_shader=$(hyprshade current)
+    if [[ "$current_shader" == "dynamic_shader_${USER}" ]]; then
+        echo "$DYNAMIC_SHADER"
+    else
+        echo "$current_shader"
+    fi
+}
+
+store_shader() {
+    local shader="$1"
+    echo "$shader" > "$TEMP_FILE"
+    echo "Stored active shader '$shader' and turning off"
+}
+
+activate_shader() {
+    local shader
+    shader=$(clean_string < "$TEMP_FILE")
+    echo "Activating saved shader '$shader'"
+    hyprshade on "$shader"
+    rm "$TEMP_FILE"
+}
+
+toggle_shader() {
+    local current_shader
+    current_shader=$(get_current_shader)
+
+    if [[ -n "$current_shader" ]]; then
+        store_shader "$current_shader"
+        hyprshade off
+    elif [[ -f "$TEMP_FILE" ]]; then
+        activate_shader
+    else
+        echo "No shader active and no saved shader. Exiting."
+        exit 0
+    fi
+}
+
+toggle_shader_off() {
+    local current_shader
+    current_shader=$(get_current_shader)
+    if [[ -n "$current_shader" ]]; then
+        store_shader "$current_shader"
+        hyprshade off
+    else
+        echo "No shader active. Exiting."
+        exit 0
+    fi
+}
+
+toggle_shader_on() {
+    if [[ -f "$TEMP_FILE" ]]; then
+        activate_shader
+    else
+        echo "No saved shader. Exiting."
+        exit 0
+    fi
+}
+
+main() {
+    case "${1:-}" in
+        off)
+            toggle_shader_off
+            ;;
+        on)
+            toggle_shader_on
+            ;;
+        "")
+            toggle_shader
+            ;;
+        *)
+            echo "Invalid argument. Usage: $0 [on|off]" >&2
+            exit 1
+            ;;
+    esac
+}
+
+main "$@"

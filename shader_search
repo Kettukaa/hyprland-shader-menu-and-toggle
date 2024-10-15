@@ -1,0 +1,14 @@
+#/bin/bash
+
+shader_dir="${HOME}/.config/hypr/shaders"
+shaders=$(ls $shader_dir)
+shaders=$(echo -e "select blue dim\n$shaders")
+shaders=$(echo "$shaders" | grep -v '^[0-9]\+dim\.frag$')
+selected_shader=$(echo "$shaders" | rofi -dmenu -i -p "Select a shader")
+
+if [ "$selected_shader" = "select blue dim" ]; then
+    bash "dim_filter"
+    exit 0
+elif [ -f "$shader_dir/$selected_shader" ]; then
+    hyprshade on $selected_shader
+fi
