@@ -20,9 +20,9 @@ sudo cp toggle_shader /usr/local/bin/.
 
 2. Make all of them executable 
 ```bash
-chmod +x dim_filter
-chmod +x shader_search
-chmod +x toggle_shader
+chmod +x /usr/local/bin/dim_filter
+chmod +x /usr/local/bin/shader_search
+chmod +x /usr/local/bin/toggle_shader
 ```
 
 3. Fill `~/.config/hypr/shaders/` with your personal shaders 
